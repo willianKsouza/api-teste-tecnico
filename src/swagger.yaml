@@ -1,0 +1,273 @@
+openapi: 3.0.0
+info:
+  title: Product and Catalog API
+  version: 1.0.0
+  description: API for managing products and catalogs
+
+servers:
+  - url: http://localhost:3001
+    description: Development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Product:
+      type: object
+      required:
+        - nome
+        - descricao
+        - preco
+        - quantidade
+        - createdBy
+      properties:
+        nome:
+          type: string
+        descricao:
+          type: string
+        preco:
+          type: number
+        quantidade:
+          type: integer
+        createdBy:
+          type: string
+          format: ObjectId
+
+    Catalog:
+      type: object
+      required:
+        - catalog_name
+        - products
+      properties:
+        catalog_name:
+          type: string
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: ObjectId
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+security:
+  - bearerAuth: []
+
+paths:
+  /product/create:
+    post:
+      tags:
+        - Products
+      summary: Create a new product
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Product created successfully
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+
+  /product/list:
+    get:
+      tags:
+        - Products
+      summary: List all products
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of products retrieved successfully
+        '401':
+          description: Unauthorized
+
+  /product/update/{id}:
+    patch:
+      tags:
+        - Products
+      summary: Update a product
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                preco:
+                  type: number
+      responses:
+        '200':
+          description: Product updated successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Product not found
+
+  /product/delete/{id}:
+    delete:
+      tags:
+        - Products
+      summary: Delete a product
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Product not found
+
+  /catalog/create:
+    post:
+      tags:
+        - Catalogs
+      summary: Create a new catalog
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Catalog'
+      responses:
+        '200':
+          description: Catalog created successfully
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad request
+
+  /catalog/list:
+    get:
+      tags:
+        - Catalogs
+      summary: List all catalogs
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of catalogs retrieved successfully
+        '401':
+          description: Unauthorized
+
+  /catalog/update/{id}:
+    patch:
+      tags:
+        - Catalogs
+      summary: Update a catalog
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                products:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: ObjectId
+      responses:
+        '200':
+          description: Catalog updated successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Catalog not found
+
+  /catalog/delete/{id}:
+    delete:
+      tags:
+        - Catalogs
+      summary: Delete a catalog
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Catalog deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Catalog not found
+
+  /user/login:
+    post:
+      tags:
+        - Users
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Invalid credentials
+        '400':
+          description: Bad request
